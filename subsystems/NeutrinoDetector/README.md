@@ -38,13 +38,13 @@ bounded for navigation.
 ## Geometry tree
 
 ```text
-/SHiP/neutrino_detector (Air, 640 x 640 x 4100 mm box)
+/SHiP/neutrino_detector (Air, 800 × 800 × 5100 mm box)
  |- veto/P{0..2}_B{0..6}                21 PVT bars (3 planes x 7)
- \- target/
+ |- target/
        |- L{0..119}/{W,Si_X,Si_Y}      120 W + 120 Si-X + 120 Si-Y
        |- L{39,79,119}/Timing          3 Timing Layers
  |- mgc/L{0..9}/{W,Si_X,Si_Y}           10 W + 10 Si-X + 10 Si-Y
- \- hcal/S{0..2}_L{0..13}/
+ |- hcal/S{0..2}_L{0..13}/
        |- Fe                            iron absorber
        |- FibreX, FibreY (air envelopes)
        |     \- 0.25 mm polystyrene fibres, 2 staggered sub-layers
