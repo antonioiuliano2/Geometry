@@ -25,7 +25,7 @@ class Materials;
  *                  tracking plane (400 mm reference plate, 11.3 mm pitch).
  *                  3 Timing layers are inserted at 1/3, 2/3 and 3/3 of the target depth.
  *   3. MGC        — a medium-granularity calorimeter: 10 layers, each a tungsten
- *                  absorber plate followed by an X and a Y silicon tracking.
+ *                  absorber plate followed by an X and a Y silicon tracking plane.
  *   4. HCAL (MTC)   — a hadronic calorimeter: three transverse sections
  *                  (60/60/60 cm), 14 layers each; every layer is an iron
  *                  absorber, an X and a Y scintillating-fibre plane, and a
