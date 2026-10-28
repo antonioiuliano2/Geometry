@@ -13,7 +13,7 @@
 
 using SHiP::geometry::Materials;
 
-// The container holds the veto, target and HCAL children directly. Counts:
+// The container holds the veto, target, MGC and HCAL children directly. Counts:
 //   veto    3 planes × 7 bars                              =   21
 //   target  120 layers × (W + Si-X + Si-Y) + 3 Timing      =  363
 //   MGC     10 layers × (W + Si-X + Si-Y)                  =   30
