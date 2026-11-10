@@ -53,7 +53,7 @@ constexpr auto s_tgt_si = 0.300 * mm;
 constexpr auto s_tgt_timing = 18.000 * mm;
 constexpr auto s_tgt_w_si_gap = 0.200 * mm;
 constexpr auto s_tgt_si_si_gap = 6.800 * mm;
-constexpr int s_tgt_n_layers = 120;
+constexpr int s_tgt_n_layers = 12;
 constexpr int s_tgt_n_timing_layers = 3;
 constexpr auto s_tgt_pitch =
     s_tgt_w + s_tgt_w_si_gap + s_tgt_si + s_tgt_si_si_gap + s_tgt_si + s_tgt_w_si_gap;  // 11.3 mm
@@ -64,7 +64,7 @@ constexpr auto s_mgc_w = 18.4 * mm;
 constexpr auto s_mgc_si = 0.65 * mm;
 constexpr auto s_mgc_w_si_gap = 0.050 * mm;
 constexpr auto s_mgc_si_si_gap = 0.200 * mm;
-constexpr int s_mgc_n_layers = 10;
+constexpr int s_mgc_n_layers = 5;
 constexpr auto s_mgc_pitch =
     s_mgc_w + s_mgc_w_si_gap + s_mgc_si + s_mgc_si_si_gap + s_mgc_si + s_mgc_w_si_gap;  // 20.0 mm
 
@@ -80,7 +80,7 @@ constexpr auto s_hcal_tile_thickness = 29.0 * mm;  // 3 cm total gap between iro
 constexpr auto s_hcal_layer =
     s_hcal_iron + 2.0 * s_hcal_fibre_plane + s_hcal_tile_thickness;  // 80 mm
 constexpr int s_hcal_n_sections = 3;
-constexpr int s_hcal_n_layers = 14;
+constexpr int s_hcal_n_layers = 2;
 constexpr LengthMm s_hcal_section_xy[s_hcal_n_sections] = {600.0 * mm, 600.0 * mm, 600.0 * mm};
 
 // Longitudinal layout (upstream → downstream), content centred in the container.
@@ -273,8 +273,8 @@ void buildFibrePlane(GeoVPhysVol* mother, const GeoLogVol* envLog, GeoPhysVol* f
     }
 }
 
-/// Build the HCAL: three transverse sections of 14 layers each, every layer an
-/// iron absorber, an X and a Y scintillating-fibre plane (individual fibres in
+/// Build the HCAL: three transverse sections of 2 layers each, every layer an
+/// iron absorber, an X scintillating-fibre plane (individual fibres in
 /// two staggered sub-layers), and a polystyrene tile grid, starting at
 /// @p zStart.
 void buildHCal(GeoVPhysVol* mother, const GeoMaterial* air, const GeoMaterial* iron,
@@ -319,8 +319,9 @@ void buildHCal(GeoVPhysVol* mother, const GeoMaterial* air, const GeoMaterial* i
             z += s_hcal_iron;
             buildFibrePlane(mother, fibreEnvLog, fibrePhys, /*isX=*/true, sectionXY, z, lTag);
             z += s_hcal_fibre_plane;
-            buildFibrePlane(mother, fibreEnvLog, fibrePhys, /*isX=*/false, sectionXY, z, lTag);
-            z += s_hcal_fibre_plane;
+            //initial configuration has only X Layers, so Y layers are commented out
+            //buildFibrePlane(mother, fibreEnvLog, fibrePhys, /*isX=*/false, sectionXY, z, lTag);
+            //z += s_hcal_fibre_plane;
 
             const LengthMm tileZc = z + 0.5 * s_hcal_tile_thickness;
             for (int row = 0; row < nTiles; ++row) {
