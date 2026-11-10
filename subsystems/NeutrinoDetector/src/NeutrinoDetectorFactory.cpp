@@ -82,6 +82,8 @@ constexpr auto s_hcal_layer =
 constexpr int s_hcal_n_sections = 3;
 constexpr int s_hcal_n_layers = 14;
 constexpr LengthMm s_hcal_section_xy[s_hcal_n_sections] = {600.0 * mm, 600.0 * mm, 600.0 * mm};
+constexpr LengthMm s_hcal_section_ironx[s_hcal_n_sections] = {400.0 * mm, 500.0 * mm, 600.0 * mm};
+constexpr LengthMm s_hcal_section_irony[s_hcal_n_sections] = {600.0 * mm, 600.0 * mm, 600.0 * mm};
 
 // Longitudinal layout (upstream → downstream), content centred in the container.
 constexpr auto s_tgt_depth = s_tgt_pitch * s_tgt_n_layers + s_tgt_n_timing_layers * s_tgt_timing;
@@ -278,7 +280,7 @@ void buildFibrePlane(GeoVPhysVol* mother, const GeoLogVol* envLog, GeoPhysVol* f
 /// two staggered sub-layers), and a polystyrene tile grid, starting at
 /// @p zStart.
 void buildHCal(GeoVPhysVol* mother, const GeoMaterial* air, const GeoMaterial* iron,
-               const GeoMaterial* polystyrene, LengthMm zStart) {
+               const GeoMaterial* polystyrene, const GeoMaterial * steel, LengthMm zStart) {
     // Tile shape is section-independent → one shared log volume.
     auto* tileLog = new GeoLogVol(std::string(kBase) + "/hcal/tile",
                                   new GeoBox(0.5 * gm(s_hcal_tile_xy), 0.5 * gm(s_hcal_tile_xy),
@@ -292,6 +294,16 @@ void buildHCal(GeoVPhysVol* mother, const GeoMaterial* air, const GeoMaterial* i
     int tileId = 0;
 
     for (int s = 0; s < s_hcal_n_sections; ++s) {
+        // iron increases only in section X
+        const LengthMm iron_sectionX = s_hcal_section_ironx[s];
+        const double iron_halfX = 0.5 * gm(iron_sectionX);
+
+        const LengthMm steel_sectionX = 0.5*(s_hcal_section_xy[s] - s_hcal_section_ironx[s]);
+        const double steel_halfX = 0.5 * gm(steel_sectionX); //one of each side of the iron section
+
+        const LengthMm iron_sectionY = s_hcal_section_irony[s];
+        const double iron_halfY = 0.5 * gm(iron_sectionY);
+
         const LengthMm sectionXY = s_hcal_section_xy[s];
         const double halfXY = 0.5 * gm(sectionXY);
         // Fibre-plane air envelope is one fibre diameter larger than the section
@@ -300,8 +312,10 @@ void buildHCal(GeoVPhysVol* mother, const GeoMaterial* air, const GeoMaterial* i
         const std::string sTag = std::string(kBase) + "/hcal/S" + std::to_string(s);
 
         // Per-section shared log volumes (reused across all 14 layers).
-        auto* ironLog =
-            new GeoLogVol(sTag + "/Fe", new GeoBox(halfXY, halfXY, 0.5 * gm(s_hcal_iron)), iron);
+        auto* ironLog = new GeoLogVol(
+            sTag + "/Fe", new GeoBox(iron_halfX, iron_halfY, 0.5 * gm(s_hcal_iron)), iron);
+        auto* steelLog = new GeoLogVol(
+            sTag + "/steel_support", new GeoBox(steel_halfX, iron_halfY, 0.5 * gm(s_hcal_iron)), steel);
         auto const* fibreEnvLog =
             new GeoLogVol(sTag + "/Fibre_ENV", new GeoBox(envHalfXY, envHalfXY, gm(envHalfZ)), air);
         auto* fibreLog =
@@ -316,6 +330,12 @@ void buildHCal(GeoVPhysVol* mother, const GeoMaterial* air, const GeoMaterial* i
             const std::string lTag = sTag + "_L" + std::to_string(l);
 
             placeChild(mother, ironLog, lTag + "/Fe", l, 0.0 * mm, 0.0 * mm, z + 0.5 * s_hcal_iron);
+            if (steel_sectionX > 0.0 * mm) {
+                placeChild(mother, steelLog, lTag + "/steel_support", l, -0.5 * (iron_sectionX + steel_sectionX),
+                           0.0 * mm, z + 0.5 * s_hcal_iron);
+                placeChild(mother, steelLog, lTag + "/steel_support", l, 0.5 * (iron_sectionX + steel_sectionX),
+                           0.0 * mm, z + 0.5 * s_hcal_iron);
+            }
             z += s_hcal_iron;
             buildFibrePlane(mother, fibreEnvLog, fibrePhys, /*isX=*/true, sectionXY, z, lTag);
             z += s_hcal_fibre_plane;
@@ -349,6 +369,7 @@ GeoPhysVol* NeutrinoDetectorFactory::build() {
     const GeoMaterial* tungsten = m_materials.requireMaterial("Tungsten");
     const GeoMaterial* silicon = m_materials.requireMaterial("Silicon");
     const GeoMaterial* iron = m_materials.requireMaterial("Iron");
+    const GeoMaterial* steel = m_materials.requireMaterial("Steel316L");
     const GeoMaterial* polystyrene = m_materials.requireMaterial("Polystyrene");
     const GeoMaterial* pvt = m_materials.requireMaterial("PVT");
 
@@ -365,7 +386,7 @@ GeoPhysVol* NeutrinoDetectorFactory::build() {
     buildVeto(containerPhys, pvt, vetoDownstreamFace);
     buildTarget(containerPhys, tungsten, silicon, targetStart);
     buildMGC(containerPhys, tungsten, silicon, mgcStart);
-    buildHCal(containerPhys, air, iron, polystyrene, hcalStart);
+    buildHCal(containerPhys, air, iron, polystyrene, steel, hcalStart);
 
     return containerPhys;
 }
